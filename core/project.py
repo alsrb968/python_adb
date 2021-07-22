@@ -1,6 +1,7 @@
 import json
 import os
 from collections import OrderedDict
+from pathlib import Path
 
 
 class Project:
@@ -12,7 +13,7 @@ class Project:
     HLAB = 'hlab'
 
     __json = OrderedDict()
-    __JSON_FILE = '{}/PycharmProjects/python_adb/path.json'.format(os.getenv('HOME'))
+    __JSON_FILE = '{0}/path.json'.format(Path(os.path.dirname(os.path.realpath(__file__))).parent)
 
     def __init__(self):
         self.get_path()
@@ -23,7 +24,8 @@ class Project:
         if os.path.exists(self.__JSON_FILE) is False \
                 or os.path.getsize(self.__JSON_FILE) < 10:
             self.set_path(Project.HLAB)
-            log.w('setting project default HLAB')
+            log.w('create {}'.format(self.__JSON_FILE))
+            log.w('set project default {}'.format(self.HLAB))
 
         with open(self.__JSON_FILE, 'r') as infile:
             self.__json = json.load(infile)
@@ -51,6 +53,8 @@ class Project:
 
         with open(self.__JSON_FILE, 'w') as outfile:
             json.dump(self.__json, outfile, ensure_ascii=False, indent='\t')
+
+        log.d('set path = {}'.format(_project))
 
     def get_project(self):
         from core import utils
