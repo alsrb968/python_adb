@@ -19,8 +19,3 @@ def test_capture(adb):
     print('path = {}'.format(path))
     print('exist = {}'.format(os.path.exists(path)))
     assert os.path.exists(path) is True
-
-
-def test_exist():
-    path = '{0}/Downloads/1.jpg'.format(os.getenv('HOME'))
-    assert os.path.exists(path) is True

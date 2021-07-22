@@ -102,5 +102,10 @@ class Adb:
         os.system("adb pull /data/{0} {1}/Downloads".format(__result, os.getenv('HOME')))
 
         out_path = '{0}/Downloads/{1}'.format(os.getenv('HOME'), __result)
+
+        if os.path.exists(out_path) is False:
+            log.e('screen capture fail')
+            return ''
+
         log.i("screen capture path = {0}".format(out_path))
         return out_path
