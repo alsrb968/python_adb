@@ -1,0 +1,93 @@
+import os
+from collections import OrderedDict
+
+
+class Adb:
+    from project import Project
+
+    __project = None
+    __json = OrderedDict()
+
+    def __init__(self, _project: Project):
+        self.__project = _project
+        self.__json = _project.get_path()
+
+    def remount(self):
+        os.system('adb remount')
+
+    def reboot(self, _reason=''):
+        if len(_reason) > 0:
+            os.system('adb reboot {reason}'.format(reason=_reason))
+            return
+        os.system('adb reboot')
+
+    def push(self, _dir, _target):
+        import utils
+
+        os.system('adb push {root}{out}{dir}{target} {dir}'
+                  .format(root=self.__json.get(utils.FROM),
+                          out=self.__json.get(utils.TO),
+                          dir=_dir,
+                          target=_target))
+
+    def install(self, _dir, _target):
+        import utils
+
+        os.system('adb install -r {root}{out}{dir}{target}/{target}.apk'
+                  .format(root=self.__json.get(utils.FROM),
+                          out=self.__json.get(utils.TO),
+                          dir=_dir,
+                          target=_target))
+
+    def lib_push(self, _target):
+        import utils
+
+        self.push(utils.LIB_DIR, _target)
+
+    def framework_push(self, _target):
+        import utils
+
+        self.push(utils.FRAMEWORK_DIR, _target)
+
+    def priv_app_push(self, _target):
+        import utils
+
+        self.push(utils.PRIV_APP_DIR, _target)
+
+    def app_push(self, _target):
+        import utils
+
+        self.push(utils.APP_DIR, _target)
+
+    def priv_app_install(self, _target):
+        import utils
+
+        self.install(utils.PRIV_APP_DIR, _target)
+
+    def app_install(self, _target):
+        import utils
+
+        self.install(utils.APP_DIR, _target)
+
+    def app_launch(self, _package):
+        os.system('adb shell monkey -p {pkg} -c android.intent.category.LAUNCHER 1'
+                  .format(pkg=_package))
+
+    def fastboot(self, _image):
+        import utils
+        from project import Project
+
+        if _image == 'dtb' and self.__project.get_project() == Project.HLAB:
+            os.system('fastboot flash {img} {root}{out}tcc8030-android-lpd4321_sv0.1.dtb'
+                      .format(root=self.__json.get(utils.FROM),
+                              out=self.__json.get(utils.TO),
+                              img=_image))
+
+        else:
+            os.system('fastboot flash {img} {root}{out}{img}.img'
+                      .format(root=self.__json.get(utils.FROM),
+                              out=self.__json.get(utils.TO),
+                              img=_image))
+
+    def fastboot_reboot(self):
+        os.system('fastboot reboot')
