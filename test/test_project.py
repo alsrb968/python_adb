@@ -12,7 +12,7 @@ def project():
     return project.Project()
 
 
-def test_get(project):
+def test_get_path(project):
     from core import utils
     from core.project import Project
 
@@ -21,5 +21,7 @@ def test_get(project):
            == utils.ROOT + __directory.get_from(Project.HLAB)
 
 
-def test_set(project):
-    project.set_path()
+def test_set_path(project):
+    _proj = project.HLAB
+    project.set_path(_proj)
+    assert project.get_project() == _proj

@@ -1,10 +1,13 @@
-ROOT = '~/LITBIG-Z840C-JACOB/project/'
+import os
+
+ROOT = '{}/LITBIG-Z840C-JACOB/project/'.format(os.getenv('HOME'))
 
 APP_DIR = 'system/app/'
 PRIV_APP_DIR = 'system/priv-app/'
 FRAMEWORK_DIR = 'system/framework/'
 LIB_DIR = 'system/lib/'
 
+PROJECT = 'project'
 FROM = 'from'
 TO = 'to'
 PORT = 'port'
@@ -14,7 +17,7 @@ AVN = '/dev/tty.usbserial-FTHFJNY0'
 
 
 class Directory:
-    from project import Project
+    from core.project import Project
 
     __from = {
         Project.BENZ_SB: 'digen/benz/benz_silverbox_tcc8990pie/',
@@ -42,7 +45,7 @@ class Directory:
 
 
 class Port:
-    from project import Project
+    from core.project import Project
 
     __port = {
         Project.BENZ_SB: DIGEN,

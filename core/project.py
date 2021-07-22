@@ -1,4 +1,5 @@
 import json
+import os
 from collections import OrderedDict
 
 
@@ -10,15 +11,19 @@ class Project:
     DPECO = 'dpeco'
     HLAB = 'hlab'
 
-    __project = None
     __json = OrderedDict()
-    __JSON_FILE = '/Users/minkyu/OneDrive/Litbig/util/python/adb/path.json'
+    __JSON_FILE = '{}/PycharmProjects/python_adb/path.json'.format(os.getenv('HOME'))
 
-    def __init__(self, project=None):
-        self.__project = project
+    def __init__(self):
+        self.get_path()
 
     def get_path(self):
-        import utils
+        from core import utils, log
+
+        if os.path.exists(self.__JSON_FILE) is False \
+                or os.path.getsize(self.__JSON_FILE) < 10:
+            self.set_path(Project.HLAB)
+            log.w('setting project default HLAB')
 
         with open(self.__JSON_FILE, 'r') as infile:
             self.__json = json.load(infile)
@@ -28,24 +33,41 @@ class Project:
 
         return self.__json
 
-    def set_path(self):
-        import log
-        import utils
-        from utils import Directory, Port
+    def set_path(self, _project):
+        from core import log, utils
+        from core.utils import Directory, Port
 
         __directory = Directory()
         __port = Port()
 
-        if self.__project is None:
+        if _project is None or len(_project) == 0:
             log.w('project is none')
-            exit(-1)
+            return
 
-        self.__json[utils.FROM] = __directory.get_from(self.__project)
-        self.__json[utils.TO] = __directory.get_to(self.__project)
-        self.__json[utils.PORT] = __port.get_port(self.__project)
+        self.__json[utils.PROJECT] = _project
+        self.__json[utils.FROM] = __directory.get_from(_project)
+        self.__json[utils.TO] = __directory.get_to(_project)
+        self.__json[utils.PORT] = __port.get_port(_project)
 
         with open(self.__JSON_FILE, 'w') as outfile:
             json.dump(self.__json, outfile, ensure_ascii=False, indent='\t')
 
     def get_project(self):
-        return self.__project
+        from core import utils
+
+        return self.__json[utils.PROJECT]
+
+    def get_from(self):
+        from core import utils
+
+        return self.__json[utils.FROM]
+
+    def get_to(self):
+        from core import utils
+
+        return self.__json[utils.TO]
+
+    def get_port(self):
+        from core import utils
+
+        return self.__json[utils.PORT]

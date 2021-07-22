@@ -38,15 +38,14 @@ if __name__ == '__main__':
     # console = serial.Serial(port=ComPort, baudrate=BaudRate, timeout=3)
     app = sys.argv[1].lower()
     input_len = len(sys.argv)
-    log.d('input len : {len}'.format(len=input_len))
+    # log.d('input len : {len}'.format(len=input_len))
     # ------ project config ------
     if input_len >= 3:
         name = sys.argv[2].lower()
 
         if app == 'project':
             if len(name) > 0:
-                project = Project(name)
-                project.set_path()
+                project.set_path(name)
                 adb = Adb(project)
 
         elif app == 'fastboot':
@@ -110,8 +109,11 @@ if __name__ == '__main__':
             #    except Exception as error:
             #        print(error)
 
+            if app == 'screencap':
+                adb.screen_capture()
+
             # ------ push ------
-            if app == 'automotive' or app == 'auto':
+            elif app == 'automotive' or app == 'auto':
                 adb.remount()
                 adb.framework_push('automotive.jar')
                 if project.get_project().__contains__(
@@ -161,7 +163,7 @@ if __name__ == '__main__':
                 adb.priv_app_install('Settings')
 
             elif app == 'key' or app == 'keyboard':
-                priv_app_push('Litbig_Keyboard')
+                priv_app_push(adb, 'Litbig_Keyboard')
 
             elif app == 'pkginst' or app == 'packageinstaller':
                 adb.remount()
@@ -185,23 +187,23 @@ if __name__ == '__main__':
                     adb.priv_app_push("Litbig_Launcher.odex")
                     adb.reboot()
                 elif project.get_path()[utils.TO] == Project.HLAB:
-                    priv_app_push("LM18I_Launcher")
+                    priv_app_push(adb, "LM18I_Launcher")
 
             elif app == 'aux':
                 if project.get_path()[utils.TO] == Project.HLAB:
-                    app_push('LM18I_AuxPlayer')
+                    app_push(adb, 'LM18I_AuxPlayer')
 
             elif app == 'dmb':
-                app_push('Litbig_DMB')
+                app_push(adb, 'Litbig_DMB')
 
             elif app == 'bt':
-                app_push('Bluetooth')
+                app_push(adb, 'Bluetooth')
 
             elif app == 'bg' or app == 'background':
                 if project.get_project().__contains__(
                         {Project.BENZ_SB,
                          Project.BENZ_SG}):
-                    app_push('Litbig_BackgroundService')
+                    app_push(adb, 'Litbig_BackgroundService')
 
             elif app == 'browser':
                 install(adb, 'Browser2', 'org.chromium.webview_shell')

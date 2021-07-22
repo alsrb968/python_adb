@@ -1,5 +1,0 @@
-{
-	"from": "hlab/avn_tcc803x_android_pie/",
-	"to": "out/target/product/car_tcc803x_arm64/",
-	"port": "/dev/tty.usbserial-FTHFJNY0"
-}
