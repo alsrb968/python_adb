@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-from core import log, utils
+
 from core.adb import Adb
 from core.project import Project
 
@@ -42,7 +42,9 @@ def priv_app_push(__adb: Adb, __name: str):
 
 def broadcast(__adb: Adb, __name: str):
     __adb.remount()
-    __adb.broadcast(__name)
+    __adb.broadcast({
+        'boot_completed': 'com.litbig.action.BOOT_COMPLETED'
+    }.get(__name))
 
 
 def key_code(__adb: Adb, __name: str):
@@ -52,7 +54,10 @@ def key_code(__adb: Adb, __name: str):
 
 def version_name(__adb: Adb, __name: str):
     __adb.remount()
-    __adb.version_name(__name)
+    __adb.version_name({
+        'polnav': 'com.polstar.polnav6',
+        'launcher': 'hanhwa.lm18i.launcher'
+   }.get(__name))
 
 
 if __name__ == '__main__':
@@ -79,115 +84,81 @@ if __name__ == '__main__':
 
             func(adb, name)
 
-    else:
-        if project.get_project() is None:
-            log.w('not saved project... please save project')
-            exit(-1)
+    elif input_len >= 2:
+        adb.remount()
 
-        if input_len >= 2:
+        if cmd == 'screencap':
+            adb.screen_capture()
 
-            if cmd == 'screencap':
-                adb.screen_capture()
-
-            # ------ push ------
-            elif cmd == 'automotive' or cmd == 'auto':
-                adb.remount()
-                adb.framework_push('automotive.jar')
-                if project.get_project().__contains__(
-                        {Project.SCANIA,
-                         Project.DPECO}):
-                    adb.framework_push('automotive.odex')
-                else:
-                    adb.framework_push('automotive-service.jar')
-
-                adb.reboot()
-
-            elif cmd == 'automotive-service' or cmd == 'autoser':
-                adb.remount()
-                adb.framework_push('automotive-service.jar')
-                adb.reboot()
-
-            elif cmd == 'framework':
-                adb.remount()
-                adb.framework_push('framework2.jar')
-                adb.framework_push('framework2.odex')
-                adb.framework_push('framework.jar')
-                adb.framework_push('framework.odex')
-                adb.framework_push('ext.jar')
-                adb.framework_push('ext.odex')
-                adb.reboot()
-
-            elif cmd == 'framework-service' or cmd == 'frser':
-                adb.remount()
-                adb.framework_push('services.jar')
-                adb.framework_push('services.jar.prof')
-                adb.framework_push('services.core.jar')
-                adb.reboot()
-
-            elif cmd == 'systemui':
-                adb.remount()
-                adb.priv_app_install('SystemUI')
-
-            elif cmd == 'wfd':
-                if project.get_project().__contains__(
-                        {Project.BENZ_SB,
-                         Project.BENZ_SG}):
-                    adb.remount()
-                    adb.priv_app_install('Litbig_WfdSink')
-
-            elif cmd == 'settings':
-                adb.remount()
-                adb.priv_app_install('Settings')
-
-            elif cmd == 'key' or cmd == 'keyboard':
-                priv_app_push(adb, 'Litbig_Keyboard')
-
-            elif cmd == 'pkginst' or cmd == 'packageinstaller':
-                adb.remount()
-                adb.priv_app_install('PackageInstaller')
-
-            elif cmd == "poweroff" or cmd == "power":
-                if project.get_project().__contains__(
-                        {Project.SCANIA,
-                         Project.DPECO}):
-                    adb.remount()
-                    adb.priv_app_push("Litbig_PowerOff.apk")
-                    adb.priv_app_push("Litbig_PowerOff.odex")
-                    adb.reboot()
-
-            elif cmd == "launcher":
-                if project.get_project().__contains__(
-                        {Project.SCANIA,
-                         Project.DPECO}):
-                    adb.remount()
-                    adb.priv_app_push("Litbig_Launcher.apk")
-                    adb.priv_app_push("Litbig_Launcher.odex")
-                    adb.reboot()
-                elif project.get_path()[utils.TO] == Project.HLAB:
-                    priv_app_push(adb, "LM18I_Launcher")
-
-            elif cmd == 'aux':
-                if project.get_path()[utils.TO] == Project.HLAB:
-                    app_push(adb, 'LM18I_AuxPlayer')
-
-            elif cmd == 'dmb':
-                app_push(adb, 'Litbig_DMB')
-
-            elif cmd == 'bt':
-                app_push(adb, 'Bluetooth')
-
-            elif cmd == 'bg' or cmd == 'background':
-                if project.get_project().__contains__(
-                        {Project.BENZ_SB,
-                         Project.BENZ_SG}):
-                    app_push(adb, 'Litbig_BackgroundService')
-
-            elif cmd == 'browser':
-                install(adb, 'Browser2', 'org.chromium.webview_shell')
-
-            elif cmd == 'camera':
-                if project.get_project() == Project.BENZ_SG:
-                    install(adb, 'Litbig_Camera', 'com.litbig.app.camera')
-
+        # ------ push ------
+        elif cmd in {'automotive', 'auto'}:
+            adb.framework_push('automotive.jar')
+            if project.get_project() in {Project.SCANIA,
+                                         Project.DPECO}:
+                adb.framework_push('automotive.odex')
             else:
-                print('not find argv')
+                adb.framework_push('automotive-service.jar')
+
+            adb.reboot()
+
+        elif cmd in {'automotive-service', 'autoser'}:
+            adb.framework_push('automotive-service.jar')
+            adb.reboot()
+
+        elif cmd == 'systemui':
+            adb.priv_app_install('SystemUI')
+
+        elif cmd == 'wfd' \
+                and project.get_project() in {Project.BENZ_SB,
+                                              Project.BENZ_SG}:
+            adb.priv_app_install('Litbig_WfdSink')
+
+        elif cmd == 'settings':
+            adb.priv_app_install('Settings')
+
+        elif cmd in {'key', 'keyboard'}:
+            priv_app_push(adb, 'Litbig_Keyboard')
+
+        elif cmd in {'pkginst', 'packageinstaller'}:
+            adb.priv_app_install('PackageInstaller')
+
+        elif cmd in {"poweroff", "power"} \
+                and project.get_project() in {Project.SCANIA,
+                                              Project.DPECO}:
+            adb.priv_app_push("Litbig_PowerOff.apk")
+            adb.priv_app_push("Litbig_PowerOff.odex")
+            adb.reboot()
+
+        elif cmd == "launcher":
+            if project.get_project() in {Project.SCANIA,
+                                         Project.DPECO}:
+                adb.priv_app_push("Litbig_Launcher.apk")
+                adb.priv_app_push("Litbig_Launcher.odex")
+                adb.reboot()
+            elif project.get_project() == Project.HLAB:
+                priv_app_push(adb, "LM18I_Launcher")
+
+        elif cmd == 'aux' \
+                and project.get_project() == Project.HLAB:
+            app_push(adb, 'LM18I_AuxPlayer')
+
+        elif cmd == 'dmb':
+            app_push(adb, 'Litbig_DMB')
+
+        elif cmd == 'bt':
+            app_push(adb, 'Bluetooth')
+
+        elif cmd in {'bg', 'background'} \
+                and project.get_project() in {Project.BENZ_SB,
+                                              Project.BENZ_SG}:
+            app_push(adb, 'Litbig_BackgroundService')
+
+        elif cmd == 'browser':
+            install(adb, 'Browser2', 'org.chromium.webview_shell')
+
+        elif cmd == 'camera' \
+                and project.get_project() == Project.BENZ_SG:
+            install(adb, 'Litbig_Camera', 'com.litbig.app.camera')
+
+        else:
+            print('not find argv')

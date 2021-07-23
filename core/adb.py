@@ -114,14 +114,11 @@ class Adb:
         log.i("screen capture path = {0}".format(out_path))
         return out_path
 
-    def broadcast(self, _what: str):
-        return self.command('adb shell am broadcast -a {}'.format(
-            {'boot_completed': 'com.litbig.action.BOOT_COMPLETED'}.get(_what)))
+    def broadcast(self, _action: str):
+        return self.command('adb shell am broadcast -a {}'.format(_action))
 
     def key_event(self, _what: str):
         return os.system('adb shell input keyevent KEYCODE_{}'.format(_what.upper()))
 
-    def version_name(self, _what: str):
-        return self.command('adb shell dumpsys package {} | grep versionName'.format(
-            {'polnav': 'com.polstar.polnav6',
-             'launcher': 'hanhwa.lm18i.launcher'}.get(_what)))
+    def version_name(self, _package: str):
+        return self.command('adb shell dumpsys package {} | grep versionName'.format(_package))

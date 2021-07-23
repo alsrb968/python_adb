@@ -34,8 +34,8 @@ def test_key_event(adb):
 
 
 def test_version_name(adb):
-    assert adb.version_name('polnav') == 'versionName=134641C V.6383'
+    assert adb.version_name('com.polstar.polnav6') == 'versionName=134641C V.6383'
 
 
 def test_broadcast(adb):
-    assert ('Broadcast completed: result=0' in adb.broadcast('boot_completed')) is True
+    assert ('Broadcast completed: result=0' in adb.broadcast('com.litbig.action.BOOT_COMPLETED')) is True
