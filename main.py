@@ -40,6 +40,21 @@ def priv_app_push(__adb: Adb, __name: str):
     __adb.reboot()
 
 
+def broadcast(__adb: Adb, __name: str):
+    __adb.remount()
+    __adb.broadcast(__name)
+
+
+def key_code(__adb: Adb, __name: str):
+    __adb.remount()
+    __adb.key_event(__name)
+
+
+def version_name(__adb: Adb, __name: str):
+    __adb.remount()
+    __adb.version_name(__name)
+
+
 if __name__ == '__main__':
     project = Project()
     adb = Adb(project)
@@ -48,7 +63,7 @@ if __name__ == '__main__':
     input_len = len(sys.argv)
     # log.d('input len : {len}'.format(len=input_len))
     if input_len >= 3:
-        name = sys.argv[2].lower()
+        name = sys.argv[2]
 
         if cmd == 'project':
             if len(name) > 0:
@@ -57,7 +72,10 @@ if __name__ == '__main__':
 
         else:
             func = {'fastboot': fastboot,
-                    'launch': launch}.get(cmd)
+                    'launch': launch,
+                    'broadcast': broadcast,
+                    'key': key_code,
+                    'version': version_name}.get(cmd)
 
             func(adb, name)
 
