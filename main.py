@@ -13,6 +13,15 @@ def fastboot(__adb: Adb, __name: str):
     __adb.fastboot_reboot()
 
 
+def launch(__adb: Adb, __name: str):
+    __adb.remount()
+    __adb.app_launch({
+        'allapps': 'com.android.allapps',
+        'settings': 'com.android.settings',
+        'documents': 'com.android.documentsui'
+    }.get(__name))
+
+
 def install(__adb: Adb, __name: str, __package: str):
     __adb.remount()
     __adb.app_install(__name)
@@ -35,85 +44,35 @@ if __name__ == '__main__':
     project = Project()
     adb = Adb(project)
 
-    # console = serial.Serial(port=ComPort, baudrate=BaudRate, timeout=3)
-    app = sys.argv[1].lower()
+    cmd = sys.argv[1].lower()
     input_len = len(sys.argv)
     # log.d('input len : {len}'.format(len=input_len))
-    # ------ project config ------
     if input_len >= 3:
         name = sys.argv[2].lower()
 
-        if app == 'project':
+        if cmd == 'project':
             if len(name) > 0:
                 project.set_path(name)
                 adb = Adb(project)
 
-        elif app == 'fastboot':
-            name = sys.argv[2].lower()
-            fastboot(adb, name)
+        else:
+            func = {'fastboot': fastboot,
+                    'launch': launch}.get(cmd)
+
+            func(adb, name)
 
     else:
         if project.get_project() is None:
             log.w('not saved project... please save project')
-            sys.exit(1)
-
-        #        if len(ComPort) > 0:
-        #            try:
-        #                console = serial.Serial(port=ComPort, baudrate=BaudRate, timeout=3)
-        #                # if console.isOpen():
-        #                #     console.write(bytes('\r\n', 'UTF-8'))
-        #                #     input_data = console.read(console.inWaiting())
-        #                #     consoleprint(input_data)
-        #                #     console.write(bytes('su \r\n', 'UTF-8'))
-        #                #     input_data = console.read(console.inWaiting())
-        #                #     consoleprint(input_data)
-        #                #     console.write(bytes('setprop sys.usb.config mtp,adb \r\n', 'UTF-8'))
-        #                #     input_data = console.read(console.inWaiting())
-        #                #     consoleprint(input_data)
-        #            except Exception as error:
-        #                print(error)
+            exit(-1)
 
         if input_len >= 2:
-            # ------ adb ------
-            # if app == 'device':
-            #    try:
-            #        if console.isOpen():
-            #            console.write(bytes('\r\n', 'UTF-8'))
-            #            console.write(bytes('su\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop init.svc.adbd running\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop persist.sys.usb.config mtp,adb\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop sys.usb.config mtp,adb\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop sys.usb.mode usb_device\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop sys.usb.state mtp,adb\r\n', 'UTF-8'))
-            #    except Exception as error:
-            #        print(error)
-            # elif app == 'host':
-            #    try:
-            #        if console.isOpen():
-            #            console.write(bytes('\r\n', 'UTF-8'))
-            #            console.write(bytes('su\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop persist.sys.usb.config host\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop sys.usb.config host\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop sys.usb.mode usb_host\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop sys.usb.state host\r\n', 'UTF-8'))
-            #    except Exception as error:
-            #        print(error)
-            # elif app == 'wifiadb':
-            #    try:
-            #        if console.isOpen():
-            #            console.write(bytes('\r\n', 'UTF-8'))
-            #            console.write(bytes('su\r\n', 'UTF-8'))
-            #            console.write(bytes('setprop service.adb.tcp.port 5555\r\n', 'UTF-8'))
-            #            console.write(bytes('stop adbd\r\n', 'UTF-8'))
-            #            console.write(bytes('start adbd\r\n', 'UTF-8'))
-            #    except Exception as error:
-            #        print(error)
 
-            if app == 'screencap':
+            if cmd == 'screencap':
                 adb.screen_capture()
 
             # ------ push ------
-            elif app == 'automotive' or app == 'auto':
+            elif cmd == 'automotive' or cmd == 'auto':
                 adb.remount()
                 adb.framework_push('automotive.jar')
                 if project.get_project().__contains__(
@@ -125,12 +84,12 @@ if __name__ == '__main__':
 
                 adb.reboot()
 
-            elif app == 'automotive-service' or app == 'autoser':
+            elif cmd == 'automotive-service' or cmd == 'autoser':
                 adb.remount()
                 adb.framework_push('automotive-service.jar')
                 adb.reboot()
 
-            elif app == 'framework':
+            elif cmd == 'framework':
                 adb.remount()
                 adb.framework_push('framework2.jar')
                 adb.framework_push('framework2.odex')
@@ -140,36 +99,36 @@ if __name__ == '__main__':
                 adb.framework_push('ext.odex')
                 adb.reboot()
 
-            elif app == 'framework-service' or app == 'frser':
+            elif cmd == 'framework-service' or cmd == 'frser':
                 adb.remount()
                 adb.framework_push('services.jar')
                 adb.framework_push('services.jar.prof')
                 adb.framework_push('services.core.jar')
                 adb.reboot()
 
-            elif app == 'systemui':
+            elif cmd == 'systemui':
                 adb.remount()
                 adb.priv_app_install('SystemUI')
 
-            elif app == 'wfd':
+            elif cmd == 'wfd':
                 if project.get_project().__contains__(
                         {Project.BENZ_SB,
                          Project.BENZ_SG}):
                     adb.remount()
                     adb.priv_app_install('Litbig_WfdSink')
 
-            elif app == 'settings':
+            elif cmd == 'settings':
                 adb.remount()
                 adb.priv_app_install('Settings')
 
-            elif app == 'key' or app == 'keyboard':
+            elif cmd == 'key' or cmd == 'keyboard':
                 priv_app_push(adb, 'Litbig_Keyboard')
 
-            elif app == 'pkginst' or app == 'packageinstaller':
+            elif cmd == 'pkginst' or cmd == 'packageinstaller':
                 adb.remount()
                 adb.priv_app_install('PackageInstaller')
 
-            elif app == "poweroff" or app == "power":
+            elif cmd == "poweroff" or cmd == "power":
                 if project.get_project().__contains__(
                         {Project.SCANIA,
                          Project.DPECO}):
@@ -178,7 +137,7 @@ if __name__ == '__main__':
                     adb.priv_app_push("Litbig_PowerOff.odex")
                     adb.reboot()
 
-            elif app.lower() == "launcher":
+            elif cmd == "launcher":
                 if project.get_project().__contains__(
                         {Project.SCANIA,
                          Project.DPECO}):
@@ -189,26 +148,26 @@ if __name__ == '__main__':
                 elif project.get_path()[utils.TO] == Project.HLAB:
                     priv_app_push(adb, "LM18I_Launcher")
 
-            elif app == 'aux':
+            elif cmd == 'aux':
                 if project.get_path()[utils.TO] == Project.HLAB:
                     app_push(adb, 'LM18I_AuxPlayer')
 
-            elif app == 'dmb':
+            elif cmd == 'dmb':
                 app_push(adb, 'Litbig_DMB')
 
-            elif app == 'bt':
+            elif cmd == 'bt':
                 app_push(adb, 'Bluetooth')
 
-            elif app == 'bg' or app == 'background':
+            elif cmd == 'bg' or cmd == 'background':
                 if project.get_project().__contains__(
                         {Project.BENZ_SB,
                          Project.BENZ_SG}):
                     app_push(adb, 'Litbig_BackgroundService')
 
-            elif app == 'browser':
+            elif cmd == 'browser':
                 install(adb, 'Browser2', 'org.chromium.webview_shell')
 
-            elif app == 'camera':
+            elif cmd == 'camera':
                 if project.get_project() == Project.BENZ_SG:
                     install(adb, 'Litbig_Camera', 'com.litbig.app.camera')
 
