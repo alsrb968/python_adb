@@ -4,6 +4,7 @@ import sys
 
 from core.adb import Adb
 from core.project import Project
+from core import utils, log
 
 
 def fastboot(__adb: Adb, __name: str):
@@ -15,11 +16,7 @@ def fastboot(__adb: Adb, __name: str):
 
 def launch(__adb: Adb, __name: str):
     __adb.remount()
-    __adb.app_launch({
-        'allapps': 'com.android.allapps',
-        'settings': 'com.android.settings',
-        'documents': 'com.android.documentsui'
-    }.get(__name))
+    __adb.app_launch(utils.NAME_PACKAGE.get(__name))
 
 
 def install(__adb: Adb, __name: str, __package: str):
@@ -54,10 +51,17 @@ def key_code(__adb: Adb, __name: str):
 
 def version_name(__adb: Adb, __name: str):
     __adb.remount()
-    __adb.version_name({
-        'polnav': 'com.polstar.polnav6',
-        'launcher': 'hanhwa.lm18i.launcher'
-   }.get(__name))
+    __adb.version_name(utils.NAME_PACKAGE.get(__name))
+
+
+def volume_get(__adb: Adb, __stream: str):
+    __adb.remount()
+    log.i(__adb.volume_get(utils.STREAM_TYPE.get(__stream)))
+
+
+def volume_set(__adb: Adb, __stream: str, __volume: int):
+    __adb.remount()
+    log.i(__adb.volume_set(utils.STREAM_TYPE.get(__stream), __volume))
 
 
 if __name__ == '__main__':
@@ -67,7 +71,17 @@ if __name__ == '__main__':
     cmd = sys.argv[1].lower()
     input_len = len(sys.argv)
     # log.d('input len : {len}'.format(len=input_len))
-    if input_len >= 3:
+
+    if input_len >= 4:
+        name = sys.argv[2]
+        value = sys.argv[3]
+
+        adb.remount()
+
+        if cmd == 'volume':
+            volume_set(adb, name, int(value))
+
+    elif input_len >= 3:
         name = sys.argv[2]
 
         if cmd == 'project':
@@ -80,7 +94,8 @@ if __name__ == '__main__':
                     'launch': launch,
                     'broadcast': broadcast,
                     'key': key_code,
-                    'version': version_name}.get(cmd)
+                    'version': version_name,
+                    'volume': volume_get}.get(cmd)
 
             func(adb, name)
 

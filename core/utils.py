@@ -15,6 +15,22 @@ PORT = 'port'
 DIGEN = '/dev/tty.usbserial-1301'
 AVN = '/dev/tty.usbserial-FTHFJNY0'
 
+STREAM_TYPE = {
+    'system': 1,
+    'ring': 2,
+    'music': 3,
+    'alarm': 4,
+    'notification': 5
+}
+
+NAME_PACKAGE = {
+    'allapps': 'com.android.allapps',
+    'settings': 'com.android.settings',
+    'documents': 'com.android.documentsui',
+    'polnav': 'com.polstar.polnav6',
+    'launcher': 'hanhwa.lm18i.launcher'
+}
+
 
 class Directory:
     from core.project import Project

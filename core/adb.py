@@ -122,3 +122,9 @@ class Adb:
 
     def version_name(self, _package: str):
         return self.command('adb shell dumpsys package {} | grep versionName'.format(_package))
+
+    def volume_get(self, _stream: int):
+        return self.command('adb shell media volume --stream {} --get'.format(_stream))
+
+    def volume_set(self, _stream: int, _volume: int):
+        return self.command('adb shell media volume --show --stream {} --set {}'.format(_stream, _volume))

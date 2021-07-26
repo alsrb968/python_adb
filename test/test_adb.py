@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 import pytest
@@ -39,3 +40,12 @@ def test_version_name(adb):
 
 def test_broadcast(adb):
     assert ('Broadcast completed: result=0' in adb.broadcast('com.litbig.action.BOOT_COMPLETED')) is True
+
+
+def test_volume_get(adb):
+    assert ('will get volume' in adb.volume_get(3)) is True
+
+
+def test_volume_set(adb):
+    _vol = 11
+    assert ('will set volume to index={}'.format(_vol) in adb.volume_set(3, _vol)) is True
