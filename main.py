@@ -7,6 +7,43 @@ from core.project import Project
 from core import utils, log
 
 
+def help():
+    log.i('1 param:')
+    print('\tscreencap')
+    print('\tvolume')
+    print('\tautomotive, auto')
+    print('\tautomotive-service, autoser')
+    print('\tsystemui')
+    print('\twfd')
+    print('\tsettings')
+    print('\tkey, keyboard')
+    print('\tpkginst, packageinstaller')
+    print('\tpoweroff, power')
+    print('\tlauncher')
+    print('\taux')
+    print('\tdmb')
+    print('\tbt')
+    print('\tbg, background')
+    print('\tbrowser')
+    print('\tcamera')
+    log.i('2 param:')
+    print('\tproject <name>')
+    print('\t\tbenz_sb')
+    print('\t\tbenz_sg')
+    print('\t\tka4')
+    print('\t\tscania')
+    print('\t\tdpeco')
+    print('\t\thlab')
+    print('\tfastboot <img>')
+    print('\tlaunch <app>')
+    print('\tbroadcast <action>')
+    print('\tkey <code>')
+    print('\tversion <app>')
+    print('\tvolume <stream>')
+    log.i('3 params:')
+    print('\tvolume <stream> <value>')
+
+
 def fastboot(__adb: Adb, __name: str):
     __adb.remount()
     __adb.reboot('bootloader')
@@ -89,6 +126,9 @@ if __name__ == '__main__':
                 project.set_path(name)
                 adb = Adb(project)
 
+        elif cmd == 'hdmi':
+            pass
+
         else:
             func = {'fastboot': fastboot,
                     'launch': launch,
@@ -101,8 +141,15 @@ if __name__ == '__main__':
 
     elif input_len >= 2:
         adb.remount()
+        
+        if cmd == 'help':
+            help()
+        
+        elif cmd == 'volume':
+            for stream in utils.STREAM_TYPE:
+                volume_get(adb, stream)
 
-        if cmd == 'screencap':
+        elif cmd == 'screencap':
             adb.screen_capture()
 
         # ------ push ------
