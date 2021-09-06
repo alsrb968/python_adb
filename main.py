@@ -9,8 +9,9 @@ from core import utils, log
 
 def help():
     log.i('1 param:')
-    print('\tscreencap')
+    print('\tcurrent')
     print('\tvolume')
+    print('\tscreencap')
     print('\tautomotive, auto')
     print('\tautomotive-service, autoser')
     print('\tsystemui')
@@ -42,6 +43,7 @@ def help():
     print('\tvolume <stream>')
     log.i('3 params:')
     print('\tvolume <stream> <value>')
+    print('\tpolnav <extra> <value>')
 
 
 def fastboot(__adb: Adb, __name: str):
