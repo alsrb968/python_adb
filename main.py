@@ -117,6 +117,11 @@ if __name__ == '__main__':
 
         if cmd == 'volume':
             volume_set(adb, name, int(value))
+        
+        elif cmd == 'polnav':
+            adb.broadcast('com.polstar.javaclient.volume.request',
+                          name,
+                          int(value))
 
     elif input_len >= 3:
         name = sys.argv[2]
@@ -125,9 +130,6 @@ if __name__ == '__main__':
             if len(name) > 0:
                 project.set_path(name)
                 adb = Adb(project)
-
-        elif cmd == 'hdmi':
-            pass
 
         else:
             func = {'fastboot': fastboot,
@@ -144,6 +146,9 @@ if __name__ == '__main__':
         
         if cmd == 'help':
             help()
+
+        elif cmd == 'current':
+            log.i(adb.activity_get())
         
         elif cmd == 'volume':
             for stream in utils.STREAM_TYPE:

@@ -114,8 +114,26 @@ class Adb:
         log.i("screen capture path = {0}".format(out_path))
         return out_path
 
-    def broadcast(self, _action: str):
-        return self.command('adb shell am broadcast -a {}'.format(_action))
+    def broadcast(self, _action: str, _extra: str=None, _extra_value=None):
+        _type = type(_extra_value)
+        extra_type: str
+
+        if _type == int:
+            extra_type = 'ei'
+        elif _type == bool:
+            extra_type = 'ez'
+        elif _type == str:
+            extra_type = 'es'
+
+        if not _extra is None and not _extra_value is None:
+            return self.command('adb shell am broadcast -a {action} --{type} {extra} {value}'
+                                .format(action=_action,
+                                        type=extra_type,
+                                        extra=_extra,
+                                        value=_extra_value))
+        else:
+            return self.command('adb shell am broadcast -a {action}'
+                                .format(action=_action))
 
     def key_event(self, _what: str):
         return os.system('adb shell input keyevent KEYCODE_{}'.format(_what.upper()))
@@ -128,3 +146,6 @@ class Adb:
 
     def volume_set(self, _stream: int, _volume: int):
         return self.command('adb shell media volume --show --stream {} --set {}'.format(_stream, _volume))
+
+    def activity_get(self):
+        return self.command("adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'")
