@@ -12,6 +12,19 @@ class Project:
     DPECO = 'dpeco'
     HLAB = 'hlab'
 
+    __PACKAGES = {
+        BENZ_SB: {},
+        BENZ_SG: {},
+        KA4: {},
+        SCANIA: {},
+        DPECO: {},
+        HLAB: {'allapps': 'com.android.allapps',
+               'settings': 'com.android.settings',
+               'documents': 'com.android.documentsui',
+               'polnav': 'com.polstar.polnav6',
+               'launcher': 'hanhwa.lm18i.launcher'},
+    }
+
     __json = OrderedDict()
     __JSON_FILE = '{0}/path.json'.format(Path(os.path.dirname(os.path.realpath(__file__))).parent)
 
@@ -49,7 +62,7 @@ class Project:
         self.__json[utils.PROJECT] = _project
         self.__json[utils.FROM] = __directory.get_from(_project)
         self.__json[utils.TO] = __directory.get_to(_project)
-        self.__json[utils.PORT] = __port.get_port(_project)
+        self.__json[utils.PORT] = __port.get(_project)
 
         with open(self.__JSON_FILE, 'w') as outfile:
             json.dump(self.__json, outfile, ensure_ascii=False, indent='\t')
@@ -75,3 +88,12 @@ class Project:
         from core import utils
 
         return self.__json[utils.PORT]
+
+    def get_packages(self):
+        return self.__PACKAGES.get(self.get_project())
+
+    def get_version(self):
+        from core import utils
+
+        __version = utils.Version()
+        return __version.get(self.get_project())

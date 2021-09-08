@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 ROOT = '{}/LITBIG-Z840C-JACOB/project/'.format(os.getenv('HOME'))
 
@@ -30,6 +31,18 @@ NAME_PACKAGE = {
     'polnav': 'com.polstar.polnav6',
     'launcher': 'hanhwa.lm18i.launcher'
 }
+
+
+class AndroidVersion(Enum):
+    KITKAT = 4.4
+    LOLLIPOP = 5
+    M = 6
+    N = 7
+    O = 8
+    P = 9
+    Q = 10
+    R = 11
+    S = 12
 
 
 class Directory:
@@ -72,5 +85,21 @@ class Port:
         Project.HLAB: AVN
     }
 
-    def get_port(self, project):
+    def get(self, project):
         return self.__port.get(project, None)
+
+
+class Version:
+    from core.project import Project
+
+    __version = {
+        Project.BENZ_SB: AndroidVersion.P,
+        Project.BENZ_SG: AndroidVersion.P,
+        Project.KA4: AndroidVersion.P,
+        Project.SCANIA: AndroidVersion.KITKAT,
+        Project.DPECO: AndroidVersion.KITKAT,
+        Project.HLAB: AndroidVersion.P
+    }
+
+    def get(self, project):
+        return self.__version.get(project, None)
