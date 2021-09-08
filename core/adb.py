@@ -44,6 +44,10 @@ class Adb:
                                  dir=_dir,
                                  target=_target))
 
+    def uninstall(self, _package):
+        return os.system('adb uninstall {package_name}'
+                         .format(package_name=_package))
+
     def lib_push(self, _target):
         from core import utils
 
