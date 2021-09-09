@@ -1,18 +1,15 @@
 import os
 import subprocess
 import time
-from collections import OrderedDict
+from core.project import Project
+from core import utils, log
 
 
 class Adb:
-    from core.project import Project
-
     __project = None
-    __json = OrderedDict()
 
     def __init__(self, _project: Project):
         self.__project = _project
-        self.__json = _project.get_path()
 
     def command(self, _cmd: str):
         return subprocess.check_output(_cmd, shell=True).decode('utf-8').strip()
@@ -27,20 +24,16 @@ class Adb:
         return os.system('adb reboot')
 
     def push(self, _dir, _target):
-        from core import utils
-
         return os.system('adb push {root}{out}{dir}{target} {dir}'
-                         .format(root=self.__json.get(utils.FROM),
-                                 out=self.__json.get(utils.TO),
+                         .format(root=self.__project.get_from(),
+                                 out=self.__project.get_to(),
                                  dir=_dir,
                                  target=_target))
 
     def install(self, _dir, _target):
-        from core import utils
-
         return os.system('adb install -r {root}{out}{dir}{target}/{target}.apk'
-                         .format(root=self.__json.get(utils.FROM),
-                                 out=self.__json.get(utils.TO),
+                         .format(root=self.__project.get_from(),
+                                 out=self.__project.get_to(),
                                  dir=_dir,
                                  target=_target))
 
@@ -49,61 +42,44 @@ class Adb:
                          .format(package_name=_package))
 
     def lib_push(self, _target):
-        from core import utils
-
-        return self.push(utils.LIB_DIR, _target)
+        return self.push(utils.Dirs.LIB_DIR, _target)
 
     def framework_push(self, _target):
-        from core import utils
-
-        return self.push(utils.FRAMEWORK_DIR, _target)
+        return self.push(utils.Dirs.FRAMEWORK_DIR, _target)
 
     def priv_app_push(self, _target):
-        from core import utils
-
-        return self.push(utils.PRIV_APP_DIR, _target)
+        return self.push(utils.Dirs.PRIV_APP_DIR, _target)
 
     def app_push(self, _target):
-        from core import utils
-
-        return self.push(utils.APP_DIR, _target)
+        return self.push(utils.Dirs.APP_DIR, _target)
 
     def priv_app_install(self, _target):
-        from core import utils
-
-        return self.install(utils.PRIV_APP_DIR, _target)
+        return self.install(utils.Dirs.PRIV_APP_DIR, _target)
 
     def app_install(self, _target):
-        from core import utils
+        return self.install(utils.Dirs.APP_DIR, _target)
 
-        return self.install(utils.APP_DIR, _target)
-
-    def app_launch(self, _package):
-        return self.command('adb shell monkey -p {pkg} -c android.intent.category.LAUNCHER 1'
-                            .format(pkg=_package))
+    def app_launch(self, _simple_name):
+        return self.command('adb shell monkey --pct-syskeys 0 -p {pkg} -c android.intent.category.LAUNCHER 1'
+                            .format(pkg=self.__project.get_packages().get(_simple_name)))
 
     def fastboot(self, _image):
-        from core import utils
-        from core.project import Project
-
-        if _image == 'dtb' and self.__project.get_project() == Project.HLAB:
+        if _image == 'dtb' and self.__project.get_name() == utils.ProjectNames.HLAB:
             return os.system('fastboot flash {img} {root}{out}tcc8030-android-lpd4321_sv0.1.dtb'
-                             .format(root=self.__json.get(utils.FROM),
-                                     out=self.__json.get(utils.TO),
+                             .format(root=self.__project.get_from(),
+                                     out=self.__project.get_to(),
                                      img=_image))
 
         else:
             return os.system('fastboot flash {img} {root}{out}{img}.img'
-                             .format(root=self.__json.get(utils.FROM),
-                                     out=self.__json.get(utils.TO),
+                             .format(root=self.__project.get_from(),
+                                     out=self.__project.get_to(),
                                      img=_image))
 
     def fastboot_reboot(self):
         return os.system('fastboot reboot')
 
     def screen_capture(self) -> str:
-        from core import log
-
         __format = '%Y%m%d_%H%M%S.png'
         __file = time.strftime(__format, time.localtime())
         os.system('adb shell screencap -p /data/{0}'.format(__file))
@@ -118,21 +94,21 @@ class Adb:
         log.i("screen capture path = {0}".format(out_path))
         return out_path
 
-    def broadcast(self, _action: str, _extra: str=None, _extra_value=None):
+    def broadcast(self, _action: str, _extra: str = None, _extra_value=None):
         _type = type(_extra_value)
-        extra_type: str
+        _extra_type: str = ''
 
         if _type == int:
-            extra_type = 'ei'
+            _extra_type = 'ei'
         elif _type == bool:
-            extra_type = 'ez'
+            _extra_type = 'ez'
         elif _type == str:
-            extra_type = 'es'
+            _extra_type = 'es'
 
         if not _extra is None and not _extra_value is None:
             return self.command('adb shell am broadcast -a {action} --{type} {extra} {value}'
                                 .format(action=_action,
-                                        type=extra_type,
+                                        type=_extra_type,
                                         extra=_extra,
                                         value=_extra_value))
         else:
@@ -142,8 +118,9 @@ class Adb:
     def key_event(self, _what: str):
         return os.system('adb shell input keyevent KEYCODE_{}'.format(_what.upper()))
 
-    def version_name(self, _package: str):
-        return self.command('adb shell dumpsys package {} | grep versionName'.format(_package))
+    def version_name(self, _simple_name: str):
+        return self.command('adb shell dumpsys package {} | grep versionName'
+                            .format(self.__project.get_packages().get(_simple_name))).split('\n')[0].split('=')[1]
 
     def volume_get(self, _stream: int):
         return self.command('adb shell media volume --stream {} --get'.format(_stream))

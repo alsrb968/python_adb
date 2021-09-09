@@ -47,59 +47,41 @@ def help():
 
 
 def fastboot(__adb: Adb, __name: str):
-    __adb.remount()
     __adb.reboot('bootloader')
     __adb.fastboot(__name)
     __adb.fastboot_reboot()
 
 
 def launch(__adb: Adb, __name: str):
-    __adb.remount()
-    __adb.app_launch(utils.NAME_PACKAGE.get(__name))
+    __adb.app_launch(__name)
 
 
 def install(__adb: Adb, __name: str, __package: str):
-    __adb.remount()
     __adb.app_install(__name)
     __adb.app_launch(__package)
 
 
 def app_push(__adb: Adb, __name: str):
-    __adb.remount()
     __adb.app_push(__name)
     __adb.reboot()
 
 
 def priv_app_push(__adb: Adb, __name: str):
-    __adb.remount()
     __adb.priv_app_push(__name)
     __adb.reboot()
 
 
 def broadcast(__adb: Adb, __name: str):
-    __adb.remount()
     __adb.broadcast({
         'boot_completed': 'com.litbig.action.BOOT_COMPLETED'
     }.get(__name))
 
 
-def key_code(__adb: Adb, __name: str):
-    __adb.remount()
-    __adb.key_event(__name)
-
-
-def version_name(__adb: Adb, __name: str):
-    __adb.remount()
-    __adb.version_name(utils.NAME_PACKAGE.get(__name))
-
-
 def volume_get(__adb: Adb, __stream: str):
-    __adb.remount()
     log.i(__adb.volume_get(utils.STREAM_TYPE.get(__stream)))
 
 
 def volume_set(__adb: Adb, __stream: str, __volume: int):
-    __adb.remount()
     log.i(__adb.volume_set(utils.STREAM_TYPE.get(__stream), __volume))
 
 
@@ -130,15 +112,19 @@ if __name__ == '__main__':
 
         if cmd == 'project':
             if len(name) > 0:
-                project.set_path(name)
+                project.save_json(name)
                 adb = Adb(project)
+
+        elif cmd == 'key':
+            adb.key_event(name)
+
+        elif cmd == 'version':
+            log.i(adb.version_name(name))
 
         else:
             func = {'fastboot': fastboot,
                     'launch': launch,
                     'broadcast': broadcast,
-                    'key': key_code,
-                    'version': version_name,
                     'volume': volume_get}.get(cmd)
 
             func(adb, name)
@@ -162,8 +148,8 @@ if __name__ == '__main__':
         # ------ push ------
         elif cmd in {'automotive', 'auto'}:
             adb.framework_push('automotive.jar')
-            if project.get_project() in {Project.SCANIA,
-                                         Project.DPECO}:
+            if project.get_name() in {utils.ProjectNames.SCANIA,
+                                      utils.ProjectNames.DPECO}:
                 adb.framework_push('automotive.odex')
             else:
                 adb.framework_push('automotive-service.jar')
@@ -178,8 +164,8 @@ if __name__ == '__main__':
             adb.priv_app_install('SystemUI')
 
         elif cmd == 'wfd' \
-                and project.get_project() in {Project.BENZ_SB,
-                                              Project.BENZ_SG}:
+                and project.get_name() in {utils.ProjectNames.BENZ_SB,
+                                           utils.ProjectNames.BENZ_SG}:
             adb.priv_app_install('Litbig_WfdSink')
 
         elif cmd == 'settings':
@@ -192,23 +178,23 @@ if __name__ == '__main__':
             adb.priv_app_install('PackageInstaller')
 
         elif cmd in {"poweroff", "power"} \
-                and project.get_project() in {Project.SCANIA,
-                                              Project.DPECO}:
+                and project.get_name() in {utils.ProjectNames.SCANIA,
+                                           utils.ProjectNames.DPECO}:
             adb.priv_app_push("Litbig_PowerOff.apk")
             adb.priv_app_push("Litbig_PowerOff.odex")
             adb.reboot()
 
         elif cmd == "launcher":
-            if project.get_project() in {Project.SCANIA,
-                                         Project.DPECO}:
+            if project.get_name() in {utils.ProjectNames.SCANIA,
+                                      utils.ProjectNames.DPECO}:
                 adb.priv_app_push("Litbig_Launcher.apk")
                 adb.priv_app_push("Litbig_Launcher.odex")
                 adb.reboot()
-            elif project.get_project() == Project.HLAB:
+            elif project.get_name() == utils.ProjectNames.HLAB:
                 priv_app_push(adb, "LM18I_Launcher")
 
         elif cmd == 'aux' \
-                and project.get_project() == Project.HLAB:
+                and project.get_name() == utils.ProjectNames.HLAB:
             app_push(adb, 'LM18I_AuxPlayer')
 
         elif cmd == 'dmb':
@@ -218,15 +204,15 @@ if __name__ == '__main__':
             app_push(adb, 'Bluetooth')
 
         elif cmd in {'bg', 'background'} \
-                and project.get_project() in {Project.BENZ_SB,
-                                              Project.BENZ_SG}:
+                and project.get_name() in {utils.ProjectNames.BENZ_SB,
+                                           utils.ProjectNames.BENZ_SG}:
             app_push(adb, 'Litbig_BackgroundService')
 
         elif cmd == 'browser':
             install(adb, 'Browser2', 'org.chromium.webview_shell')
 
         elif cmd == 'camera' \
-                and project.get_project() == Project.BENZ_SG:
+                and project.get_name() == utils.ProjectNames.BENZ_SG:
             install(adb, 'Litbig_Camera', 'com.litbig.app.camera')
 
         else:

@@ -1,17 +1,15 @@
 import os
-import subprocess
 import sys
-
 import pytest
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from core import utils
+from core.adb import Adb
+from core.project import Project
 
 
 @pytest.fixture
 def adb():
-    from core.adb import Adb
-    from core.project import Project
-
     return Adb(Project())
 
 
@@ -20,7 +18,7 @@ def test_remount(adb):
 
 
 def test_launch(adb):
-    assert ('bash arg: hanhwa.lm18i.launcher' in adb.app_launch('hanhwa.lm18i.launcher')) is True
+    assert ('bash arg: hanhwa.lm18i.launcher' in adb.app_launch('launcher')) is True
 
 
 def test_capture(adb):
@@ -35,7 +33,7 @@ def test_key_event(adb):
 
 
 def test_version_name(adb):
-    assert adb.version_name('com.polstar.polnav6') == 'versionName=134641C V.6383'
+    assert adb.version_name('setup') == '1.0'
 
 
 def test_broadcast(adb):
@@ -43,9 +41,10 @@ def test_broadcast(adb):
 
 
 def test_volume_get(adb):
-    assert ('will get volume' in adb.volume_get(3)) is True
+    assert ('will get volume' in adb.volume_get(utils.STREAM_TYPE.get(utils.Streams.MUSIC))) is True
 
 
 def test_volume_set(adb):
     _vol = 11
-    assert ('will set volume to index={}'.format(_vol) in adb.volume_set(3, _vol)) is True
+    assert ('will set volume to index={}'.format(_vol) in
+            adb.volume_set(utils.STREAM_TYPE.get(utils.Streams.MUSIC), _vol)) is True

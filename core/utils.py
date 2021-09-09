@@ -1,39 +1,47 @@
 import os
-from enum import Enum
 
 ROOT = '{}/LITBIG-Z840C-JACOB/project/'.format(os.getenv('HOME'))
 
-APP_DIR = 'system/app/'
-PRIV_APP_DIR = 'system/priv-app/'
-FRAMEWORK_DIR = 'system/framework/'
-LIB_DIR = 'system/lib/'
 
-PROJECT = 'project'
-FROM = 'from'
-TO = 'to'
-PORT = 'port'
-
-DIGEN = '/dev/tty.usbserial-1301'
-AVN = '/dev/tty.usbserial-FTHFJNY0'
-
-STREAM_TYPE = {
-    'system': 1,
-    'ring': 2,
-    'music': 3,
-    'alarm': 4,
-    'notification': 5
-}
-
-NAME_PACKAGE = {
-    'allapps': 'com.android.allapps',
-    'settings': 'com.android.settings',
-    'documents': 'com.android.documentsui',
-    'polnav': 'com.polstar.polnav6',
-    'launcher': 'hanhwa.lm18i.launcher'
-}
+class Dirs:
+    APP_DIR = 'system/app/'
+    PRIV_APP_DIR = 'system/priv-app/'
+    FRAMEWORK_DIR = 'system/framework/'
+    LIB_DIR = 'system/lib/'
 
 
-class AndroidVersion(Enum):
+class JsonKeys:
+    ROOT = 'root'
+    NAME = 'name'
+    FROM = 'from'
+    TO = 'to'
+    PORT = 'port'
+    VERSION = 'version'
+
+
+class Ports:
+    DIGEN = '/dev/tty.usbserial-1301'
+    AVN = '/dev/tty.usbserial-FTHFJNY0'
+
+
+class ProjectNames:
+    BENZ_SB = 'benz_sb'
+    BENZ_SG = 'benz_sg'
+    KA4 = 'ka4'
+    SCANIA = 'scania'
+    DPECO = 'dpeco'
+    HLAB = 'hlab'
+
+
+class Streams:
+    SYSTEM = 'system'
+    RING = 'ring'
+    MUSIC = 'music'
+    ALARM = 'alarm'
+    NOTIFICATION = 'notification'
+
+
+class AndroidVersion:
     KITKAT = 4.4
     LOLLIPOP = 5
     M = 6
@@ -45,61 +53,60 @@ class AndroidVersion(Enum):
     S = 12
 
 
-class Directory:
-    from core.project import Project
+STREAM_TYPE = {
+    Streams.SYSTEM: 1,
+    Streams.RING: 2,
+    Streams.MUSIC: 3,
+    Streams.ALARM: 4,
+    Streams.NOTIFICATION: 5
+}
 
-    __from = {
-        Project.BENZ_SB: 'digen/benz/benz_silverbox_tcc8990pie/',
-        Project.BENZ_SG: 'digen/benz/benz_smartglass_tcc8990pie/',
-        Project.KA4: 'digen/ka4/ka4_silverbox_tcc8990pie/',
-        Project.SCANIA: 'scania/avn_tcc897x_android_kk/',
-        Project.DPECO: 'jy/dpeco/avn_tcc897x_android_kk/',
-        Project.HLAB: 'hlab/avn_tcc803x_android_pie/'
-    }
+PROJECT_PACKAGE_NAME = {
+    ProjectNames.BENZ_SB: {},
+    ProjectNames.BENZ_SG: {},
+    ProjectNames.KA4: {},
+    ProjectNames.SCANIA: {},
+    ProjectNames.DPECO: {},
+    ProjectNames.HLAB: {'allapps': 'com.android.allapps',
+                        'settings': 'com.android.settings',
+                        'documents': 'com.android.documentsui',
+                        'polnav': 'com.polstar.polnav6',
+                        'launcher': 'hanhwa.lm18i.launcher',
+                        'setup': 'hanhwa.lm18i.setup'},
+}
 
-    __to = {
-        Project.BENZ_SB: 'out/target/product/tcc899x/',
-        Project.BENZ_SG: 'out/target/product/tcc899x/',
-        Project.KA4: 'out/target/product/tcc899x/',
-        Project.SCANIA: 'out/target/product/tcc897x/',
-        Project.DPECO: 'out/target/product/tcc897x/',
-        Project.HLAB: 'out/target/product/car_tcc803x_arm64/'
-    }
+PROJECT_FROM_DIR = {
+    ProjectNames.BENZ_SB: 'digen/benz/benz_silverbox_tcc8990pie/',
+    ProjectNames.BENZ_SG: 'digen/benz/benz_smartglass_tcc8990pie/',
+    ProjectNames.KA4: 'digen/ka4/ka4_silverbox_tcc8990pie/',
+    ProjectNames.SCANIA: 'scania/avn_tcc897x_android_kk/',
+    ProjectNames.DPECO: 'jy/dpeco/avn_tcc897x_android_kk/',
+    ProjectNames.HLAB: 'hlab/avn_tcc803x_android_pie/'
+}
 
-    def get_from(self, project):
-        return self.__from.get(project, None)
+PROJECT_TO_DIR = {
+    ProjectNames.BENZ_SB: 'out/target/product/tcc899x/',
+    ProjectNames.BENZ_SG: 'out/target/product/tcc899x/',
+    ProjectNames.KA4: 'out/target/product/tcc899x/',
+    ProjectNames.SCANIA: 'out/target/product/tcc897x/',
+    ProjectNames.DPECO: 'out/target/product/tcc897x/',
+    ProjectNames.HLAB: 'out/target/product/car_tcc803x_arm64/'
+}
 
-    def get_to(self, project):
-        return self.__to.get(project, None)
+PROJECT_PORT = {
+    ProjectNames.BENZ_SB: Ports.DIGEN,
+    ProjectNames.BENZ_SG: Ports.DIGEN,
+    ProjectNames.KA4: Ports.DIGEN,
+    ProjectNames.SCANIA: Ports.AVN,
+    ProjectNames.DPECO: Ports.AVN,
+    ProjectNames.HLAB: Ports.AVN
+}
 
-
-class Port:
-    from core.project import Project
-
-    __port = {
-        Project.BENZ_SB: DIGEN,
-        Project.BENZ_SG: DIGEN,
-        Project.KA4: DIGEN,
-        Project.SCANIA: AVN,
-        Project.DPECO: AVN,
-        Project.HLAB: AVN
-    }
-
-    def get(self, project):
-        return self.__port.get(project, None)
-
-
-class Version:
-    from core.project import Project
-
-    __version = {
-        Project.BENZ_SB: AndroidVersion.P,
-        Project.BENZ_SG: AndroidVersion.P,
-        Project.KA4: AndroidVersion.P,
-        Project.SCANIA: AndroidVersion.KITKAT,
-        Project.DPECO: AndroidVersion.KITKAT,
-        Project.HLAB: AndroidVersion.P
-    }
-
-    def get(self, project):
-        return self.__version.get(project, None)
+PROJECT_VERSION = {
+    ProjectNames.BENZ_SB: AndroidVersion.P,
+    ProjectNames.BENZ_SG: AndroidVersion.P,
+    ProjectNames.KA4: AndroidVersion.P,
+    ProjectNames.SCANIA: AndroidVersion.KITKAT,
+    ProjectNames.DPECO: AndroidVersion.KITKAT,
+    ProjectNames.HLAB: AndroidVersion.P
+}

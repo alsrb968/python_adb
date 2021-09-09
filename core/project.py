@@ -2,98 +2,118 @@ import json
 import os
 from collections import OrderedDict
 from pathlib import Path
+from core import utils, log
 
 
 class Project:
-    BENZ_SB = 'benz_sb'
-    BENZ_SG = 'benz_sg'
-    KA4 = 'ka4'
-    SCANIA = 'scania'
-    DPECO = 'dpeco'
-    HLAB = 'hlab'
-
-    __PACKAGES = {
-        BENZ_SB: {},
-        BENZ_SG: {},
-        KA4: {},
-        SCANIA: {},
-        DPECO: {},
-        HLAB: {'allapps': 'com.android.allapps',
-               'settings': 'com.android.settings',
-               'documents': 'com.android.documentsui',
-               'polnav': 'com.polstar.polnav6',
-               'launcher': 'hanhwa.lm18i.launcher'},
-    }
-
-    __json = OrderedDict()
     __JSON_FILE = '{0}/path.json'.format(Path(os.path.dirname(os.path.realpath(__file__))).parent)
+    __default_name = utils.ProjectNames.HLAB
 
-    def __init__(self):
-        self.get_path()
+    __root: str = utils.ROOT
+    __name: str = None
+    __from: str = None
+    __to: str = None
+    __port: str = None
+    __version: str = None
 
-    def get_path(self):
-        from core import utils, log
+    def __init__(self, name: str = None):
+        if name:
+            self.save_json(name)
+        else:
+            self.load_json()
 
+    def load_json(self):
+        __json: dict = OrderedDict()
         if os.path.exists(self.__JSON_FILE) is False \
                 or os.path.getsize(self.__JSON_FILE) < 10:
-            self.set_path(Project.HLAB)
-            log.w('create {}'.format(self.__JSON_FILE))
-            log.w('set project default {}'.format(self.HLAB))
-
-        with open(self.__JSON_FILE, 'r') as infile:
-            self.__json = json.load(infile)
-
-        if self.__json[utils.FROM]:
-            self.__json[utils.FROM] = utils.ROOT + self.__json[utils.FROM]
-
-        return self.__json
-
-    def set_path(self, _project):
-        from core import log, utils
-        from core.utils import Directory, Port
-
-        __directory = Directory()
-        __port = Port()
-
-        if _project is None or len(_project) == 0:
-            log.w('project is none')
+            self.save_json(self.__default_name)
+            log.w('create %s' % self.__JSON_FILE)
+            log.w('set project default %s' % self.__default_name)
             return
 
-        self.__json[utils.PROJECT] = _project
-        self.__json[utils.FROM] = __directory.get_from(_project)
-        self.__json[utils.TO] = __directory.get_to(_project)
-        self.__json[utils.PORT] = __port.get(_project)
+        with open(self.__JSON_FILE, 'r') as infile:
+            __json = json.load(infile)
+
+        for key in __json.keys():
+            if key == utils.JsonKeys.ROOT:
+                self.__root = __json[utils.JsonKeys.ROOT]
+            elif key == utils.JsonKeys.NAME:
+                self.__name = __json[utils.JsonKeys.NAME]
+            elif key == utils.JsonKeys.FROM:
+                self.__from = __json[utils.JsonKeys.FROM]
+            elif key == utils.JsonKeys.TO:
+                self.__to = __json[utils.JsonKeys.TO]
+            elif key == utils.JsonKeys.PORT:
+                self.__port = __json[utils.JsonKeys.PORT]
+            elif key == utils.JsonKeys.VERSION:
+                self.__version = __json[utils.JsonKeys.VERSION]
+
+        if not self.__name \
+                or not self.__from \
+                or not self.__to \
+                or not self.__port \
+                or not self.__version:
+            self.save_json(self.__default_name)
+            log.w('set project default %s' % self.__default_name)
+
+    def save_json(self, name=None):
+        __json: dict = OrderedDict()
+        self.__root = utils.ROOT
+        if name:
+            self.__name = name
+            self.__from = utils.PROJECT_FROM_DIR.get(name)
+            self.__to = utils.PROJECT_TO_DIR.get(name)
+            self.__port = utils.PROJECT_PORT.get(name)
+            self.__version = utils.PROJECT_VERSION.get(name)
+            log.w('project set %s' % name)
+
+        if not self.__name \
+                or not self.__from \
+                or not self.__to \
+                or not self.__port \
+                or not self.__version:
+            self.__name = self.__default_name
+            self.__from = utils.PROJECT_FROM_DIR.get(self.__default_name)
+            self.__to = utils.PROJECT_TO_DIR.get(self.__default_name)
+            self.__port = utils.PROJECT_PORT.get(self.__default_name)
+            self.__version = utils.PROJECT_VERSION.get(self.__default_name)
+            log.w('project set default %s' % self.__default_name)
+
+        __json[utils.JsonKeys.ROOT] = self.__root
+        __json[utils.JsonKeys.NAME] = self.__name
+        __json[utils.JsonKeys.FROM] = self.__from
+        __json[utils.JsonKeys.TO] = self.__to
+        __json[utils.JsonKeys.PORT] = self.__port
+        __json[utils.JsonKeys.VERSION] = self.__version
 
         with open(self.__JSON_FILE, 'w') as outfile:
-            json.dump(self.__json, outfile, ensure_ascii=False, indent='\t')
+            json.dump(__json, outfile, ensure_ascii=False, indent='\t')
 
-        log.d('set path = {}'.format(_project))
+        log.d('save project name = %s' % self.__name)
 
-    def get_project(self):
-        from core import utils
-
-        return self.__json[utils.PROJECT]
+    def get_name(self):
+        return self.__name
 
     def get_from(self):
-        from core import utils
-
-        return self.__json[utils.FROM]
+        return self.__from
 
     def get_to(self):
-        from core import utils
-
-        return self.__json[utils.TO]
+        return self.__to
 
     def get_port(self):
-        from core import utils
-
-        return self.__json[utils.PORT]
-
-    def get_packages(self):
-        return self.__PACKAGES.get(self.get_project())
+        return self.__port
 
     def get_version(self):
-        from core import utils
+        return self.__version
 
-        __version = utils.Version()
-        return __version.get(self.get_project())
+    def get_packages(self):
+        return utils.PROJECT_PACKAGE_NAME.get(self.get_name())
+
+    def to_string(self):
+        return 'root={_root}, name={_name}, from={_from}, to={_to}, port={_port}, version={_version}'\
+            .format(_root=self.__root,
+                    _name=self.__name,
+                    _from=self.__from,
+                    _to=self.__to,
+                    _port=self.__port,
+                    _version=self.__version)
