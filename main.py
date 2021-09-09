@@ -7,6 +7,10 @@ from core.project import Project
 from core import utils, log
 
 
+project = Project()
+adb = Adb(project)
+
+
 def help():
     log.i('1 param:')
     print('\tcurrent')
@@ -46,53 +50,67 @@ def help():
     print('\tpolnav <extra> <value>')
 
 
-def fastboot(__adb: Adb, *images):
+def fastboot(*images):
     if len(images) > 0:
-        __adb.reboot('bootloader')
+        adb.reboot('bootloader')
         for img in images:
-            __adb.fastboot(img)
-        __adb.fastboot_reboot()
+            adb.fastboot(img)
+        adb.fastboot_reboot()
     else:
         log.w("fastboot do nothing")
 
 
-def launch(__adb: Adb, __name: str):
-    __adb.app_launch(__name)
+def install(__name: str, __package: str):
+    adb.app_install(__name)
+    adb.app_launch(__package)
 
 
-def install(__adb: Adb, __name: str, __package: str):
-    __adb.app_install(__name)
-    __adb.app_launch(__package)
+def uninstall(name: str):
+    adb.uninstall(project.get_packages().get(name))
 
 
-def app_push(__adb: Adb, __name: str):
-    __adb.app_push(__name)
-    __adb.reboot()
+def push(type: str, *names: str):
+    if len(names) > 0:
+        for name in names:
+            if type == 'app':
+                adb.app_push(name)
+
+            elif type == 'priv':
+                adb.priv_app_push(name)
+
+            elif type == 'lib':
+                adb.lib_push(name)
+
+            elif type == 'framework':
+                adb.framework_push(name)
+
+            else:
+                return
+    else:
+        return
+
+    adb.reboot()
 
 
-def priv_app_push(__adb: Adb, __name: str):
-    __adb.priv_app_push(__name)
-    __adb.reboot()
-
-
-def broadcast(__adb: Adb, __name: str):
-    __adb.broadcast({
+def broadcast(__name: str):
+    adb.broadcast({
         'boot_completed': 'com.litbig.action.BOOT_COMPLETED'
     }.get(__name))
 
 
-def volume_get(__adb: Adb, __stream: str):
-    log.i(__adb.volume_get(utils.STREAM_TYPE.get(__stream)))
+def volume(stream: str = None, volume: int = None):
+    if not stream and not volume:
+        for _stream in utils.STREAM_TYPE:
+            log.i(adb.volume_get(utils.STREAM_TYPE.get(_stream)))
 
+    elif stream and not volume:
+        log.i(adb.volume_get(utils.STREAM_TYPE.get(stream)))
 
-def volume_set(__adb: Adb, __stream: str, __volume: int):
-    log.i(__adb.volume_set(utils.STREAM_TYPE.get(__stream), __volume))
+    elif stream and volume:
+        log.i(adb.volume_set(utils.STREAM_TYPE.get(stream), volume))
 
 
 if __name__ == '__main__':
-    project = Project()
-    adb = Adb(project)
-
     cmd = sys.argv[1].lower()
     input_len = len(sys.argv)
     # log.d('input len : {len}'.format(len=input_len))
@@ -101,10 +119,8 @@ if __name__ == '__main__':
         name = sys.argv[2]
         value = sys.argv[3]
 
-        adb.remount()
-
         if cmd == 'volume':
-            volume_set(adb, name, int(value))
+            volume(stream=name, volume=int(value))
         
         elif cmd == 'polnav':
             adb.broadcast('com.polstar.javaclient.volume.request',
@@ -119,23 +135,20 @@ if __name__ == '__main__':
                 project.save_json(name)
                 adb = Adb(project)
 
-        elif cmd == 'key':
-            adb.key_event(name)
-
         elif cmd == 'version':
             log.i(adb.version_name(name))
 
         else:
-            func = {'fastboot': fastboot,
-                    'launch': launch,
+            func = {'key': adb.key_event,
+                    'fastboot': fastboot,
+                    'launch': adb.app_launch,
                     'broadcast': broadcast,
-                    'volume': volume_get}.get(cmd)
+                    'volume': volume}.get(cmd)
 
-            func(adb, name)
+            func(name)
 
     elif input_len >= 2:
-        adb.remount()
-        
+
         if cmd == 'help':
             help()
 
@@ -144,7 +157,7 @@ if __name__ == '__main__':
         
         elif cmd == 'volume':
             for stream in utils.STREAM_TYPE:
-                volume_get(adb, stream)
+                volume(stream=stream)
 
         elif cmd == 'screencap':
             adb.screen_capture()
@@ -161,8 +174,7 @@ if __name__ == '__main__':
             adb.reboot()
 
         elif cmd in {'automotive-service', 'autoser'}:
-            adb.framework_push('automotive-service.jar')
-            adb.reboot()
+            push('framework', 'automotive-service.jar')
 
         elif cmd == 'systemui':
             adb.priv_app_install('SystemUI')
@@ -176,7 +188,7 @@ if __name__ == '__main__':
             adb.priv_app_install('Settings')
 
         elif cmd in {'key', 'keyboard'}:
-            priv_app_push(adb, 'Litbig_Keyboard')
+            push('priv', 'Litbig_Keyboard')
 
         elif cmd in {'pkginst', 'packageinstaller'}:
             adb.priv_app_install('PackageInstaller')
@@ -184,40 +196,36 @@ if __name__ == '__main__':
         elif cmd in {"poweroff", "power"} \
                 and project.get_name() in {utils.ProjectNames.SCANIA,
                                            utils.ProjectNames.DPECO}:
-            adb.priv_app_push("Litbig_PowerOff.apk")
-            adb.priv_app_push("Litbig_PowerOff.odex")
-            adb.reboot()
+            push('priv', 'Litbig_PowerOff.apk', 'Litbig_PowerOff.odex')
 
         elif cmd == "launcher":
             if project.get_name() in {utils.ProjectNames.SCANIA,
                                       utils.ProjectNames.DPECO}:
-                adb.priv_app_push("Litbig_Launcher.apk")
-                adb.priv_app_push("Litbig_Launcher.odex")
-                adb.reboot()
+                push('priv', 'Litbig_Launcher.apk', 'Litbig_Launcher.odex')
             elif project.get_name() == utils.ProjectNames.HLAB:
-                priv_app_push(adb, "LM18I_Launcher")
+                push('priv', 'LM18I_Launcher')
 
         elif cmd == 'aux' \
                 and project.get_name() == utils.ProjectNames.HLAB:
-            app_push(adb, 'LM18I_AuxPlayer')
+            push('app', 'LM18I_AuxPlayer')
 
         elif cmd == 'dmb':
-            app_push(adb, 'Litbig_DMB')
+            push('app', 'Litbig_DMB')
 
         elif cmd == 'bt':
-            app_push(adb, 'Bluetooth')
+            push('app', 'Bluetooth')
 
         elif cmd in {'bg', 'background'} \
                 and project.get_name() in {utils.ProjectNames.BENZ_SB,
                                            utils.ProjectNames.BENZ_SG}:
-            app_push(adb, 'Litbig_BackgroundService')
+            push('app', 'Litbig_BackgroundService')
 
         elif cmd == 'browser':
-            install(adb, 'Browser2', 'org.chromium.webview_shell')
+            install('Browser2', 'org.chromium.webview_shell')
 
         elif cmd == 'camera' \
                 and project.get_name() == utils.ProjectNames.BENZ_SG:
-            install(adb, 'Litbig_Camera', 'com.litbig.app.camera')
+            install('Litbig_Camera', 'com.litbig.app.camera')
 
         else:
             print('not find argv')
