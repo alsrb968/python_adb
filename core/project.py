@@ -91,6 +91,9 @@ class Project:
 
         log.d('save project name = %s' % self.__name)
 
+    def get_root(self):
+        return self.__root
+
     def get_name(self):
         return self.__name
 

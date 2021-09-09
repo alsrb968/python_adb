@@ -24,16 +24,18 @@ class Adb:
         return os.system('adb reboot')
 
     def push(self, _dir, _target):
-        return os.system('adb push {root}{out}{dir}{target} {dir}'
-                         .format(root=self.__project.get_from(),
-                                 out=self.__project.get_to(),
+        return os.system('adb push {_root}{_from}{_to}{dir}{target} {dir}'
+                         .format(_root=self.__project.get_root(),
+                                 _from=self.__project.get_from(),
+                                 _to=self.__project.get_to(),
                                  dir=_dir,
                                  target=_target))
 
     def install(self, _dir, _target):
-        return os.system('adb install -r {root}{out}{dir}{target}/{target}.apk'
-                         .format(root=self.__project.get_from(),
-                                 out=self.__project.get_to(),
+        return os.system('adb install -r {_root}{_from}{_to}{dir}{target}/{target}.apk'
+                         .format(_root=self.__project.get_root(),
+                                 _from=self.__project.get_from(),
+                                 _to=self.__project.get_to(),
                                  dir=_dir,
                                  target=_target))
 
@@ -65,15 +67,17 @@ class Adb:
 
     def fastboot(self, _image):
         if _image == 'dtb' and self.__project.get_name() == utils.ProjectNames.HLAB:
-            return os.system('fastboot flash {img} {root}{out}tcc8030-android-lpd4321_sv0.1.dtb'
-                             .format(root=self.__project.get_from(),
-                                     out=self.__project.get_to(),
+            return os.system('fastboot flash {img} {_root}{_from}{_to}tcc8030-android-lpd4321_sv0.1.dtb'
+                             .format(_root=self.__project.get_root(),
+                                     _from=self.__project.get_from(),
+                                     _to=self.__project.get_to(),
                                      img=_image))
 
         else:
-            return os.system('fastboot flash {img} {root}{out}{img}.img'
-                             .format(root=self.__project.get_from(),
-                                     out=self.__project.get_to(),
+            return os.system('fastboot flash {img} {_root}{_from}{_to}{img}.img'
+                             .format(_root=self.__project.get_root(),
+                                     _from=self.__project.get_from(),
+                                     _to=self.__project.get_to(),
                                      img=_image))
 
     def fastboot_reboot(self):

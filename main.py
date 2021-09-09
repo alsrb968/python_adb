@@ -46,10 +46,14 @@ def help():
     print('\tpolnav <extra> <value>')
 
 
-def fastboot(__adb: Adb, __name: str):
-    __adb.reboot('bootloader')
-    __adb.fastboot(__name)
-    __adb.fastboot_reboot()
+def fastboot(__adb: Adb, *images):
+    if len(images) > 0:
+        __adb.reboot('bootloader')
+        for img in images:
+            __adb.fastboot(img)
+        __adb.fastboot_reboot()
+    else:
+        log.w("fastboot do nothing")
 
 
 def launch(__adb: Adb, __name: str):
