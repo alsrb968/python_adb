@@ -28,6 +28,10 @@ def test_capture(adb):
     assert os.path.exists(path) is True
 
 
+def test_broadcast(adb):
+    assert ('Broadcast completed: result=0' in adb.broadcast('com.litbig.action.BOOT_COMPLETED')) is True
+
+
 def test_key_event(adb):
     assert adb.key_event('HOME') is 0
 
@@ -36,15 +40,15 @@ def test_version_name(adb):
     assert adb.version_name('setup') == '1.0'
 
 
-def test_broadcast(adb):
-    assert ('Broadcast completed: result=0' in adb.broadcast('com.litbig.action.BOOT_COMPLETED')) is True
-
-
 def test_volume_get(adb):
     assert ('will get volume' in adb.volume_get(utils.STREAM_TYPE.get(utils.Streams.MUSIC))) is True
 
 
 def test_volume_set(adb):
     _vol = 11
-    assert ('will set volume to index={}'.format(_vol) in
-            adb.volume_set(utils.STREAM_TYPE.get(utils.Streams.MUSIC), _vol)) is True
+    assert 'will set volume to index={}'.format(_vol) \
+           in adb.volume_set(utils.STREAM_TYPE.get(utils.Streams.MUSIC), _vol)
+
+
+def test_activity_get(adb):
+    assert adb.activity_get().startswith('mCurrentFocus')
