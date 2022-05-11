@@ -66,19 +66,23 @@ class Adb:
                             .format(pkg=self.__project.get_packages().get(_simple_name)))
 
     def fastboot(self, _image):
+        msg: str
         if _image == 'dtb' and self.__project.get_name() == utils.ProjectNames.HLAB:
-            return os.system('fastboot flash {img} {_root}{_from}{_to}tcc8030-android-lpd4321_sv0.1.dtb'
-                             .format(_root=self.__project.get_root(),
-                                     _from=self.__project.get_from(),
-                                     _to=self.__project.get_to(),
-                                     img=_image))
+            msg = 'fastboot flash {img} {_root}{_from}{_to}tcc8030-android-lpd4321_sv0.1.dtb'\
+                .format(_root=self.__project.get_root(),
+                        _from=self.__project.get_from(),
+                        _to=self.__project.get_to(),
+                        img=_image)
 
         else:
-            return os.system('fastboot flash {img} {_root}{_from}{_to}{img}.img'
-                             .format(_root=self.__project.get_root(),
-                                     _from=self.__project.get_from(),
-                                     _to=self.__project.get_to(),
-                                     img=_image))
+            msg = 'fastboot flash {img} {_root}{_from}{_to}{img}.img'\
+                .format(_root=self.__project.get_root(),
+                        _from=self.__project.get_from(),
+                        _to=self.__project.get_to(),
+                        img=_image)
+
+        log.i(msg)
+        return os.system(msg)
 
     def fastboot_reboot(self):
         return os.system('fastboot reboot')
@@ -122,9 +126,13 @@ class Adb:
     def key_event(self, _what: str):
         return os.system('adb shell input keyevent KEYCODE_{}'.format(_what.upper()))
 
-    def version_name(self, _simple_name: str):
-        return self.command('adb shell dumpsys package {} | grep versionName'
-                            .format(self.__project.get_packages().get(_simple_name))).split('\n')[0].split('=')[1]
+    def version_name(self, _name: str):
+        if len(_name.split('.')) > 1:
+            return self.command('adb shell dumpsys package {} | grep versionName'
+                                .format(_name)).split('\n')[0].split('=')[1]
+        else:
+            return self.command('adb shell dumpsys package {} | grep versionName'
+                                .format(self.__project.get_packages().get(_name))).split('\n')[0].split('=')[1]
 
     def volume_get(self, _stream: int):
         return self.command('adb shell media volume --stream {} --get'.format(_stream))

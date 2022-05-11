@@ -20,8 +20,8 @@ class JsonKeys:
 
 
 class Ports:
-    DIGEN = '/dev/tty.usbserial-1301'
-    AVN = '/dev/tty.usbserial-FTHFJNY0'
+    DIGEN = '/dev/tty.usbserial-1100'
+    AVN = '/dev/tty.usbserial-11300'
 
 
 class ProjectNames:
@@ -34,11 +34,13 @@ class ProjectNames:
 
 
 class Streams:
+    VOICE_CALL = 'voice_call'
     SYSTEM = 'system'
     RING = 'ring'
     MUSIC = 'music'
     ALARM = 'alarm'
     NOTIFICATION = 'notification'
+    BLUETOOTH_SCO = 'bluetooth_sco'
 
 
 class AndroidVersion:
@@ -54,11 +56,13 @@ class AndroidVersion:
 
 
 STREAM_TYPE = {
+    Streams.VOICE_CALL: 0,
     Streams.SYSTEM: 1,
     Streams.RING: 2,
     Streams.MUSIC: 3,
     Streams.ALARM: 4,
-    Streams.NOTIFICATION: 5
+    Streams.NOTIFICATION: 5,
+    Streams.BLUETOOTH_SCO: 6
 }
 
 PROJECT_PACKAGE_NAME = {
@@ -69,8 +73,8 @@ PROJECT_PACKAGE_NAME = {
     ProjectNames.DPECO: {},
     ProjectNames.HLAB: {'allapps': 'com.android.allapps',
                         'settings': 'com.android.settings',
-                        'documents': 'com.android.documentsui',
-                        'polnav': 'com.polstar.polnav6',
+                        'documentsui': 'com.android.documentsui',
+                        'polnav6': 'com.polstar.polnav6',
                         'launcher': 'hanhwa.lm18i.launcher',
                         'setup': 'hanhwa.lm18i.setup'},
 }
