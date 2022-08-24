@@ -31,6 +31,7 @@ class ProjectNames:
     SCANIA = 'scania'
     DPECO = 'dpeco'
     HLAB = 'hlab'
+    CARPLAY = 'carplay'
 
 
 class Streams:
@@ -77,6 +78,7 @@ PROJECT_PACKAGE_NAME = {
                         'polnav6': 'com.polstar.polnav6',
                         'launcher': 'hanhwa.lm18i.launcher',
                         'setup': 'hanhwa.lm18i.setup'},
+    ProjectNames.CARPLAY: {},
 }
 
 PROJECT_FROM_DIR = {
@@ -85,7 +87,8 @@ PROJECT_FROM_DIR = {
     ProjectNames.KA4: 'digen/ka4/ka4_silverbox_tcc8990pie/',
     ProjectNames.SCANIA: 'scania/avn_tcc897x_android_kk/',
     ProjectNames.DPECO: 'jy/dpeco/avn_tcc897x_android_kk/',
-    ProjectNames.HLAB: 'hlab/avn_tcc803x_android_pie/'
+    ProjectNames.HLAB: 'hlab/avn_tcc803x_android_pie/',
+    ProjectNames.CARPLAY: 'hlab/carplay/',
 }
 
 PROJECT_TO_DIR = {
@@ -94,7 +97,8 @@ PROJECT_TO_DIR = {
     ProjectNames.KA4: 'out/target/product/tcc899x/',
     ProjectNames.SCANIA: 'out/target/product/tcc897x/',
     ProjectNames.DPECO: 'out/target/product/tcc897x/',
-    ProjectNames.HLAB: 'out/target/product/car_tcc803x_arm64/'
+    ProjectNames.HLAB: 'out/target/product/car_tcc803x_arm64/',
+    ProjectNames.CARPLAY: 'out/target/product/car_tcc803x_arm64/',
 }
 
 PROJECT_PORT = {
@@ -103,7 +107,8 @@ PROJECT_PORT = {
     ProjectNames.KA4: Ports.DIGEN,
     ProjectNames.SCANIA: Ports.AVN,
     ProjectNames.DPECO: Ports.AVN,
-    ProjectNames.HLAB: Ports.AVN
+    ProjectNames.HLAB: Ports.AVN,
+    ProjectNames.CARPLAY: Ports.AVN,
 }
 
 PROJECT_VERSION = {
@@ -112,5 +117,6 @@ PROJECT_VERSION = {
     ProjectNames.KA4: AndroidVersion.P,
     ProjectNames.SCANIA: AndroidVersion.KITKAT,
     ProjectNames.DPECO: AndroidVersion.KITKAT,
-    ProjectNames.HLAB: AndroidVersion.P
+    ProjectNames.HLAB: AndroidVersion.P,
+    ProjectNames.CARPLAY: AndroidVersion.P,
 }

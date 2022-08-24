@@ -33,6 +33,7 @@ def __push(_type: str, names: str):
         return
 
     print(_type)
+    adb.remount()
     for name in names:
         if _type == 'app':
             if project.get_version() == utils.AndroidVersion.KITKAT:
@@ -98,6 +99,7 @@ parser.add_argument('--launch', type=str, help='launch application by package na
 parser.add_argument('--broadcast', nargs='*', type=str, help='broadcast message only action or action with extra')
 parser.add_argument('--activity', action='store_true', help='get current activity name')
 parser.add_argument('--push', nargs='*', type=str, help='push app, priv-app, lib, framework')
+parser.add_argument('--install', nargs='*', type=str, help='install app')
 parser.add_argument('--boot_completed', action='store_true', help='send broadcast litbig BOOT_COMPLETED')
 parser.add_argument('--tab')
 
@@ -146,6 +148,10 @@ if __name__ == '__main__':
     elif args.push:
         if len(args.push) >= 1:
             __push(args.push[0], args.push[1:])
+    
+    elif args.install:
+        if len(args.install) >= 1:
+            __install(args.install[0], args.install[1])
 
     elif args.boot_completed:
         __broadcast('boot_completed')

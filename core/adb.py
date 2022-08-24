@@ -32,7 +32,7 @@ class Adb:
                                  target=_target))
 
     def install(self, _dir, _target):
-        return os.system('adb install -r {_root}{_from}{_to}{dir}{target}/{target}.apk'
+        return os.system('adb install -r {_root}{_from}{_to}{dir}{target}.apk'
                          .format(_root=self.__project.get_root(),
                                  _from=self.__project.get_from(),
                                  _to=self.__project.get_to(),
