@@ -142,3 +142,19 @@ class Adb:
 
     def activity_get(self):
         return self.command("adb shell dumpsys window windows | grep -E 'mCurrentFocus|mFocusedApp'")
+
+    def color_get(self, _color: str = 'all'):
+        if self.__project.get_name() == utils.ProjectNames.HLAB:
+            _value = self.command('adb shell "cat sys/devices/platform/tccfb/{color}"'.format(color=_color))
+            return '{color}: {value}'.format(color=_color, value=_value)
+        else:
+            log.e('only hlab project can use this command')
+
+    def color_set(self, _color: str, _value: str):
+        if self.__project.get_name() == utils.ProjectNames.HLAB:
+            self.command(
+                'adb shell "echo {value} > sys/devices/platform/tccfb/{color}"'.format(color=_color, value=_value)
+            )
+            return '{color}: {value}'.format(color=_color, value=_value)
+        else:
+            log.e('only hlab project can use this command')

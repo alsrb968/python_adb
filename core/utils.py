@@ -56,6 +56,15 @@ class AndroidVersion:
     S = 12
 
 
+class Colors:
+    MAIN_BRIGHTNESS = 'main_disp_brightness'
+    MAIN_CONTRAST = 'main_disp_contrast'
+    MAIN_HUE = 'main_disp_hue'
+    SUB_BRIGHTNESS = 'sub_disp_brightness'
+    SUB_CONTRAST = 'sub_disp_contrast'
+    SUB_HUE = 'sub_disp_hue'
+
+
 STREAM_TYPE = {
     Streams.VOICE_CALL: 0,
     Streams.SYSTEM: 1,
@@ -120,3 +129,12 @@ PROJECT_VERSION = {
     ProjectNames.HLAB: AndroidVersion.P,
     ProjectNames.CARPLAY: AndroidVersion.P,
 }
+
+COLOR_TYPE = [
+    Colors.MAIN_BRIGHTNESS,
+    Colors.MAIN_CONTRAST,
+    Colors.MAIN_HUE,
+    Colors.SUB_BRIGHTNESS,
+    Colors.SUB_CONTRAST,
+    Colors.SUB_HUE
+]

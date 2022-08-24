@@ -85,12 +85,26 @@ def __volume(stream: str = None, volume: int = None):
         log.i(adb.volume_set(utils.STREAM_TYPE.get(stream), volume))
 
 
+def __color(color: str = None, values: int = None):
+    if not color and not values:
+        for _color in utils.COLOR_TYPE:
+            log.i(adb.color_get(_color))
+    elif color and not values:
+        log.i(adb.color_get(color))
+    elif not color and values and len(values) > 0:
+        for index, value in enumerate(values):
+            log.i(adb.color_set(utils.COLOR_TYPE[index], value))
+
+
 parser = argparse.ArgumentParser(usage='이렇게 씁니다.', description='Argparse Tutorial')
 # argument는 원하는 만큼 추가한다.
 parser.add_argument('--screencap', action='store_true', help='capture current screen, save at Download')
 parser.add_argument('--volume', nargs='*', type=str, help='"all"= get volume all, '
                                                           '<type>= get volume type, '
                                                           '<type, vol>= set volume type on vol')
+parser.add_argument('--color', nargs='*', type=str, help='"all"= get color all, '
+                                                         '<color>= get color value(main_disp_brightness, main_disp_contrast...), '
+                                                         '<brightness, contrast, ...>= set color value(brightness, contrast...)')
 parser.add_argument('--project', type=str, help='select project')
 parser.add_argument('--version', type=str, help='get application version name')
 parser.add_argument('--key', type=str, help='transmit key event')
@@ -101,7 +115,6 @@ parser.add_argument('--activity', action='store_true', help='get current activit
 parser.add_argument('--push', nargs='*', type=str, help='push app, priv-app, lib, framework')
 parser.add_argument('--install', nargs='*', type=str, help='install app')
 parser.add_argument('--boot_completed', action='store_true', help='send broadcast litbig BOOT_COMPLETED')
-parser.add_argument('--tab')
 
 args = parser.parse_args()
 
@@ -119,6 +132,15 @@ if __name__ == '__main__':
                 __volume(stream=args.volume[0])
         elif len(args.volume) == 2:
             __volume(stream=args.volume[0], volume=args.volume[1])
+
+    elif args.color:
+        if len(args.color) == 1:
+            if args.color[0] == 'all':
+                __color()
+            else:  # get brightness, contrast, hue...
+                __color(color=args.color[0])
+        else:  # set brightness, contrast, hue...
+            __color(values=args.color)
 
     elif args.project:
         project.save_json(args.project)
@@ -148,10 +170,13 @@ if __name__ == '__main__':
     elif args.push:
         if len(args.push) >= 1:
             __push(args.push[0], args.push[1:])
-    
+
     elif args.install:
         if len(args.install) >= 1:
             __install(args.install[0], args.install[1])
 
     elif args.boot_completed:
         __broadcast('boot_completed')
+
+    else:
+        log.w('unknown command')
