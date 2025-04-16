@@ -6,7 +6,9 @@ from core import utils, log
 
 
 class Project:
-    __JSON_FILE = '{0}/path.json'.format(Path(os.path.dirname(os.path.realpath(__file__))).parent)
+    __JSON_FILE = "{0}/path.json".format(
+        Path(os.path.dirname(os.path.realpath(__file__))).parent
+    )
     __default_name = utils.ProjectNames.HLAB
 
     __root: str = utils.ROOT
@@ -24,14 +26,16 @@ class Project:
 
     def load_json(self):
         __json: dict = OrderedDict()
-        if os.path.exists(self.__JSON_FILE) is False \
-                or os.path.getsize(self.__JSON_FILE) < 10:
+        if (
+            os.path.exists(self.__JSON_FILE) is False
+            or os.path.getsize(self.__JSON_FILE) < 10
+        ):
             self.save_json(self.__default_name)
-            log.w('create %s' % self.__JSON_FILE)
-            log.w('set project default %s' % self.__default_name)
+            log.w("create %s" % self.__JSON_FILE)
+            log.w("set project default %s" % self.__default_name)
             return
 
-        with open(self.__JSON_FILE, 'r') as infile:
+        with open(self.__JSON_FILE, "r") as infile:
             __json = json.load(infile)
 
         for key in __json.keys():
@@ -48,13 +52,15 @@ class Project:
             elif key == utils.JsonKeys.VERSION:
                 self.__version = __json[utils.JsonKeys.VERSION]
 
-        if not self.__name \
-                or not self.__from \
-                or not self.__to \
-                or not self.__port \
-                or not self.__version:
+        if (
+            not self.__name
+            or not self.__from
+            or not self.__to
+            or not self.__port
+            or not self.__version
+        ):
             self.save_json(self.__default_name)
-            log.w('set project default %s' % self.__default_name)
+            log.w("set project default %s" % self.__default_name)
 
     def save_json(self, name=None):
         __json: dict = OrderedDict()
@@ -65,19 +71,21 @@ class Project:
             self.__to = utils.PROJECT_TO_DIR.get(name)
             self.__port = utils.PROJECT_PORT.get(name)
             self.__version = utils.PROJECT_VERSION.get(name)
-            log.w('project set %s' % name)
+            log.w("project set %s" % name)
 
-        if not self.__name \
-                or not self.__from \
-                or not self.__to \
-                or not self.__port \
-                or not self.__version:
+        if (
+            not self.__name
+            or not self.__from
+            or not self.__to
+            or not self.__port
+            or not self.__version
+        ):
             self.__name = self.__default_name
             self.__from = utils.PROJECT_FROM_DIR.get(self.__default_name)
             self.__to = utils.PROJECT_TO_DIR.get(self.__default_name)
             self.__port = utils.PROJECT_PORT.get(self.__default_name)
             self.__version = utils.PROJECT_VERSION.get(self.__default_name)
-            log.w('project set default %s' % self.__default_name)
+            log.w("project set default %s" % self.__default_name)
 
         __json[utils.JsonKeys.ROOT] = self.__root
         __json[utils.JsonKeys.NAME] = self.__name
@@ -86,10 +94,10 @@ class Project:
         __json[utils.JsonKeys.PORT] = self.__port
         __json[utils.JsonKeys.VERSION] = self.__version
 
-        with open(self.__JSON_FILE, 'w') as outfile:
-            json.dump(__json, outfile, ensure_ascii=False, indent='\t')
+        with open(self.__JSON_FILE, "w") as outfile:
+            json.dump(__json, outfile, ensure_ascii=False, indent="\t")
 
-        log.d('save project name = %s' % self.__name)
+        log.d("save project name = %s" % self.__name)
 
     def get_root(self):
         return self.__root
@@ -113,10 +121,11 @@ class Project:
         return utils.PROJECT_PACKAGE_NAME.get(self.get_name())
 
     def to_string(self):
-        return 'root={_root}, name={_name}, from={_from}, to={_to}, port={_port}, version={_version}'\
-            .format(_root=self.__root,
-                    _name=self.__name,
-                    _from=self.__from,
-                    _to=self.__to,
-                    _port=self.__port,
-                    _version=self.__version)
+        return "root={_root}, name={_name}, from={_from}, to={_to}, port={_port}, version={_version}".format(
+            _root=self.__root,
+            _name=self.__name,
+            _from=self.__from,
+            _to=self.__to,
+            _port=self.__port,
+            _version=self.__version,
+        )
