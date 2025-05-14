@@ -1,6 +1,12 @@
 import os
+import platform
 
-ROOT = "{}/LITBIG-Z840C-JACOB/project/".format(os.getenv("HOME"))
+if platform.system() == "Windows": # Windows
+    ROOT = "Z:/project/"
+elif platform.system() == "Darwin": # macOS
+    ROOT = "{}/LITBIG-Z840C-JACOB/project/".format(os.getenv("HOME"))
+else: # Linux
+    ROOT = "{}/LITBIG-Z840C-JACOB/project/".format(os.getenv("HOME"))
 
 
 class Dirs:
@@ -22,8 +28,15 @@ class JsonKeys:
 
 
 class Ports:
-    DIGEN = "/dev/tty.usbserial-1100"
-    AVN = "/dev/tty.usbserial-11300"
+    if platform.system() == "Windows": # Windows
+        DIGEN = "COM4"
+        AVN = "COM3"
+    elif platform.system() == "Darwin": # macOS
+        DIGEN = "/dev/tty.usbserial-1100"
+        AVN = "/dev/tty.usbserial-11300"
+    else: # Linux
+        DIGEN = "/dev/ttyUSB0"
+        AVN = "/dev/ttyUSB1"
 
 
 class ProjectNames:
